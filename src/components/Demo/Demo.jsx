@@ -1,15 +1,16 @@
-import { render } from "@testing-library/react";
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Header from "../Header/Header";
 import axios from "axios";
-// import {BsWhatsapp} from "react-icons/bs"
+import Swal from "sweetalert2";
+import Loader from "../Loader/Loader";
 
 class Demo extends React.Component {
   state = {
     value: "",
     numbers: [],
     template: "",
+    loading: false,
   };
 
   handleChange = (evt) => {
@@ -32,10 +33,26 @@ class Demo extends React.Component {
       var number = this.state.value.trim();
 
       if (number) {
-        this.setState({
-          numbers: [...this.state.numbers, number],
-          value: "",
-        });
+        const code = number.slice(0, 3);
+
+        if (code !== "234") {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: `Each number must start with '234' `,
+          });
+        } else if (number.length !== 11) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: `Each number must be 11 digits `,
+          });
+        } else {
+          this.setState({
+            numbers: [...this.state.numbers, number],
+            value: "",
+          });
+        }
       }
     }
   };
@@ -46,23 +63,39 @@ class Demo extends React.Component {
     });
   };
 
+  //this function calls the api
   sendBroadcast = async () => {
-    console.log("number", this.state.numbers, "Template", this.state.template);
+    // console.log("number", this.state.numbers, "Template", this.state.template);
+
     const url = `https://api.myserviceagent.net/api/v1/whatsapp`;
-    const json = JSON.stringify({
-      msisdns: this.state.numbers[0],
-      template: this.state.template,
-    });
+
+    this.setState({ loading: true });
     await axios
       .post(url, {
         msisdns: this.state.numbers[0],
         template: this.state.template,
       })
       .then((res) => {
+        this.setState({ loading: false });
         console.log(res);
+
+        //show success pop-up message
+        Swal.fire({
+          icon: "success",
+          title: "Successful",
+          text: `${res.data.data} `,
+        });
+
+        this.setState({ numbers: [], template: "" });
       })
       .catch((err) => {
         if (err.response) {
+          this.setState({ loading: false });
+          Swal.fire({
+            icon: "error",
+            title: "Oops..",
+            text: "An error occured. Try again",
+          });
           console.log(err);
         }
       });
@@ -71,11 +104,17 @@ class Demo extends React.Component {
   render() {
     return (
       <Box>
+        {this.state.loading ? <Loader /> : null}
         <Header />
         <h3>Intelligent Broadcast</h3>
 
         <FormHold>
-          <label htmlFor="number">Phone Numbers</label>
+          <label htmlFor="number">
+            Phone Numbers <br />
+            <span style={{ color: "#ccc", fontWeight: "400" }}>
+              (click Enter, Tab or ',' after each number entry)
+            </span>
+          </label>
           <HoldInputs>
             {this.state.numbers.map((number) => (
               <Num key={number}>
@@ -90,7 +129,7 @@ class Demo extends React.Component {
               </Num>
             ))}
             <input
-              placeholder="234XXXXXXXXXX...`Enter`"
+              placeholder="234XXXXXXXXXX,"
               id="number"
               value={this.state.value}
               onChange={this.handleChange}
@@ -126,17 +165,17 @@ const Box = styled.div`
     text-align: center;
     font-style: normal;
     font-weight: 700;
-    font-size: 55px;
+    font-size: 35px;
     line-height: 40px;
   }
 `;
 
 const FormHold = styled.div`
-  width: 613px;
-  padding: 20px 40px;
+  width: 520px;
+  padding: 20px;
 
   @media screen and (max-width: 425px) {
-    width: 90%;
+    width: 100%;
   }
 
   label {

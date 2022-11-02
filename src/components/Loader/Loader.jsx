@@ -1,10 +1,10 @@
 import React from "react";
-import { GridLoader } from "react-spinners";
+import { GridLoader, ScaleLoader } from "react-spinners";
 import styled from "styled-components";
 const Loader = () => {
   return (
     <Hold>
-      <GridLoader color="#eb2931" />
+      <GridLoader color="#eb2931" size="30px" />
     </Hold>
   );
 };
