@@ -41,11 +41,11 @@ class Demo extends React.Component {
             title: "Error",
             text: `Each number must start with '234' `,
           });
-        } else if (number.length !== 11) {
+        } else if (number.length !== 13) {
           Swal.fire({
             icon: "error",
             title: "Error",
-            text: `Each number must be 11 digits `,
+            text: `Each number must be 13 digits `,
           });
         } else {
           this.setState({
